@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Chat Box</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .chat-container {
+            width: 350px;
+            height: 500px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background-color: #4a90e2;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .download-button {
+            background-color: white;
+            color: #4a90e2;
+            border: 1px solid white;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .download-button:hover {
+            background-color: #e7e7e7;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 10px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-message {
+            max-width: 80%;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background-color: #4a90e2;
+            color: white;
+        }
+
+        .chat-message.bot {
+            align-self: flex-start;
+            background-color: #f1f1f1;
+            color: #333;
+        }
+
+        .chat-input {
+            display: flex;
+            border-top: 1px solid #ddd;
+        }
+
+        .chat-input input {
+            flex: 1;
+            border: none;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 0 0 0 15px;
+        }
+
+        .chat-input button {
+            border: none;
+            padding: 10px;
+            background-color: #4a90e2;
+            color: white;
+            font-size: 16px;
+            border-radius: 0 0 15px 0;
+            cursor: pointer;
+        }
+
+        .chat-input button:hover {
+            background-color: #357ab8;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <span id="contactName">Loading...</span>
+            <button class="download-button" onclick="downloadChat()">Download chat</button>
+        </div>
+        <div class="chat-messages" id="chatMessages"></div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Type a message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const contactName = urlParams.get('contact');
+        document.getElementById('contactName').textContent = contactName || 'Unknown';
+
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (message === '') return;
+
+            addMessage('user', message);
+            chatInput.value = '';
+
+            setTimeout(() => {
+                addMessage('bot', generateBotResponse(message));
+            }, 500);
+        }
+
+        function addMessage(sender, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+            messageDiv.textContent = text;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function generateBotResponse(userMessage) {
+            const responses = [
+                "That's interesting! Tell me more.",
+                "I'm here to help!", 
+                "Can you elaborate on that?", 
+                "Why do you think so?",
+                "Let's explore that further!"
+            ];
+            return responses[Math.floor(Math.random() * responses.length)];
+        }
+
+        function downloadChat() {
+            let chatContent = '';
+            const messages = chatMessages.querySelectorAll('.chat-message');
+            messages.forEach(msg => {
+                const sender = msg.classList.contains('user') ? 'You' : 'Bot';
+                chatContent += `${sender}: ${msg.textContent}\n`;
+            });
+
+            const blob = new Blob([chatContent], { type: 'text/plain' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'chat-log.txt';
+            link.click();
+        }
+    </script>
+</body>
+</html>
